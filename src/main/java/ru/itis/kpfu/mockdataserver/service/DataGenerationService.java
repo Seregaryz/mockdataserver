@@ -15,12 +15,18 @@ public class DataGenerationService {
 
     public GeneratedItem generateValue(String pluginType, String fieldName) {
         if (isSinglePrimitive(pluginType)) {
-            return generateSinglePrimitive(
-                pluginType.endsWith("?") ? pluginType.substring(0, pluginType.length() - 2) : pluginType
-            );
+            String pluginTypeClean;
+            if (pluginType.endsWith("?")) {
+                pluginTypeClean = pluginType.substring(0, pluginType.length() - 2);
+            } else pluginTypeClean = pluginType;
+            return generateSinglePrimitive(pluginTypeClean);
         } else if (isSingleString(pluginType)) {
+            String pluginTypeClean;
+            if (pluginType.endsWith("?")) {
+                pluginTypeClean = pluginType.substring(0, pluginType.length() - 2);
+            } else pluginTypeClean = pluginType;
             return generateStringValue(
-                pluginType.endsWith("?") ? pluginType.substring(0, pluginType.length() - 2) : pluginType,
+                pluginTypeClean,
                 fieldName
             );
         }
@@ -31,11 +37,11 @@ public class DataGenerationService {
         if (isHeaderField(fieldName)) {
             return new GeneratedItem(11, generateHeaderString());
         }
-            return null;
+            return new GeneratedItem(11, "Test");
     }
 
     private String generateHeaderString() {
-        return null;
+        return "Test";
     }
 
     private boolean isSingleString(String pluginType) {

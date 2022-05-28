@@ -67,11 +67,11 @@ public class PluginResponse {
         this.nameOfRootModel = nameOfRootModel;
     }
 
-    public Boolean getRepresentative() {
+    public Boolean getIsRepresentative() {
         return isRepresentative;
     }
 
-    public void setRepresentative(Boolean representative) {
-        isRepresentative = representative;
+    public void setIsRepresentative(Boolean isRepresentative) {
+        this.isRepresentative = isRepresentative;
     }
 }

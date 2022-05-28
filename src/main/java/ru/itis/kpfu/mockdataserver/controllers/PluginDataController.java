@@ -3,6 +3,7 @@ package ru.itis.kpfu.mockdataserver.controllers;
 import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.itis.kpfu.mockdataserver.entity.GeneratedItem;
@@ -17,6 +18,7 @@ import ru.itis.kpfu.mockdataserver.repository.ClassModelRepository;
 import ru.itis.kpfu.mockdataserver.repository.InternalFieldRepository;
 import ru.itis.kpfu.mockdataserver.repository.PrimitiveFieldRepository;
 import ru.itis.kpfu.mockdataserver.service.DataGenerationService;
+import ru.itis.kpfu.mockdataserver.service.PluginDataService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,48 +40,33 @@ public class PluginDataController {
     @Autowired
     private InternalFieldRepository internalFieldRepository;
 
+    @Autowired
+    private DataGenerationService dataGenerationService;
+
+    @Autowired
+    private PluginDataService pluginDataService;
+
     @PostMapping("/add_new_endpoint")
     public ResponseEntity<String> sendPluginData(@RequestBody PluginResponse pluginResponse) {
         try {
-            DataGenerationService dataGenerationService = new DataGenerationService();
 
-            HashMap<String, LinkedTreeMap<String, Object>> rawModelMap;
-            HashMap<String, FieldType> modelMap = new HashMap<>();
+            HashMap<String, LinkedTreeMap<String, Object>> jsonModelMap;
+            HashMap<String, FieldType> modelMap;
             try {
-                rawModelMap = (HashMap) new Gson().fromJson(pluginResponse.getRootModel(), HashMap.class);
+                jsonModelMap = (HashMap) new Gson().fromJson(pluginResponse.getRootModel(), HashMap.class);
             } catch (Exception e) {
                 return ResponseEntity.badRequest().body("Некорректные данные модели");
             }
-            HashMap<String, LinkedTreeMap<String, Object>> finalRawModelMap = rawModelMap;
-            rawModelMap.keySet().forEach(fieldKey -> {
-                modelMap.put(fieldKey, new FieldType(
-                        (String) finalRawModelMap.get(fieldKey).get("type"),
-                        (Boolean) finalRawModelMap.get(fieldKey).get("isPrimitive")
-                ));
-            });
+            modelMap = pluginDataService.parseJsonModelMap(jsonModelMap);
 
-            List<LinkedTreeMap<String, LinkedTreeMap<String, LinkedTreeMap<String, Object>>>> rawAdditionalModels;
-            List<HashMap<String, HashMap<String, FieldType>>> additionalModels = new ArrayList<>();
+            List<LinkedTreeMap<String, LinkedTreeMap<String, LinkedTreeMap<String, Object>>>> jsonAdditionalModels;
+            List<HashMap<String, HashMap<String, FieldType>>> additionalModelList;
             try {
-                rawAdditionalModels = (List) new Gson().fromJson(pluginResponse.getAdditionalModels(), List.class);
+                jsonAdditionalModels = (List) new Gson().fromJson(pluginResponse.getAdditionalModels(), List.class);
             } catch (Exception e) {
                 return ResponseEntity.badRequest().body("Некорректные данные вложенных моделей");
             }
-
-            rawAdditionalModels.forEach(classMap -> {
-                HashMap<String, HashMap<String, FieldType>> resultClassMap = new HashMap<>();
-                classMap.keySet().forEach(classKey -> {
-                    HashMap<String, FieldType> resultMap = new HashMap<>();
-                    classMap.get(classKey).keySet().forEach(fieldKey -> {
-                        resultMap.put(fieldKey, new FieldType(
-                                (String) classMap.get(classKey).get(fieldKey).get("type"),
-                                (Boolean) classMap.get(classKey).get(fieldKey).get("isPrimitive")
-                        ));
-                    });
-                    resultClassMap.put(classKey, resultMap);
-                });
-                additionalModels.add(resultClassMap);
-            });
+            additionalModelList = pluginDataService.parseJsonAdditionalModelMap(jsonAdditionalModels);
 
             // save endpoint
             Endpoint endpoint = new Endpoint();
@@ -92,7 +79,7 @@ public class PluginDataController {
             rootClassModel.setRoot(true);
             rootClassModel.setEndpoint(savedEndpointValue);
             rootClassModel.setName(pluginResponse.getNameOfRootModel());
-            rootClassModel.setHasInternal(!additionalModels.isEmpty());
+            rootClassModel.setHasInternal(!additionalModelList.isEmpty());
             rootClassModel.setHasPrimitive(hasPrimitives(modelMap));
             ClassModel savedRootClassModel = classModelRepository.save(rootClassModel);
 
@@ -100,8 +87,8 @@ public class PluginDataController {
             modelMap.keySet().forEach(fieldKey -> {
                 if (modelMap.get(fieldKey).getPrimitive()) {
                     GeneratedItem generatedItem = dataGenerationService.generateValue(
-                            modelMap.get(fieldKey).getType(),
-                            fieldKey
+                        modelMap.get(fieldKey).getType(),
+                        fieldKey
                     );
                     PrimitiveField primitiveField = new PrimitiveField();
                     primitiveField.setName(fieldKey);
@@ -120,7 +107,7 @@ public class PluginDataController {
             });
 
             // save additional models and root internal fields
-            additionalModels.forEach(map -> map.keySet().forEach(modelKey -> {
+            additionalModelList.forEach(map -> map.keySet().forEach(modelKey -> {
 
                 //saving additional model
                 ClassModel additionalClassModel = new ClassModel();
@@ -138,8 +125,8 @@ public class PluginDataController {
                 map.get(modelKey).keySet().forEach(fieldKey -> {
                     if (finalAdditionalModelMap.get(fieldKey).getPrimitive()) {
                         GeneratedItem generatedItem = dataGenerationService.generateValue(
-                                finalAdditionalModelMap.get(fieldKey).getType(),
-                                fieldKey
+                            finalAdditionalModelMap.get(fieldKey).getType(),
+                            fieldKey
                         );
                         PrimitiveField primitiveField = new PrimitiveField();
                         primitiveField.setName(fieldKey);
@@ -158,9 +145,17 @@ public class PluginDataController {
                 });
             }));
 
-            //
-
-            return ResponseEntity.ok("Endpoint успешно сохранен");
+            StringBuilder responseBuilder = new StringBuilder();
+            if (pluginResponse.getLocale().equals("Russian")) {
+                responseBuilder.append("Endpoint успешно сохранен. Url для получения данных: ");
+            } else responseBuilder.append("The endpoint was saved successfully. Url to get data: ");
+            responseBuilder.append("http://localhost:8080/generator/");
+            responseBuilder.append(pluginResponse.getUserId());
+            if (!pluginResponse.getEndpoint().startsWith("/")) responseBuilder.append("/");
+            responseBuilder.append(pluginResponse.getEndpoint());
+            return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body((new Gson().toJson(responseBuilder.toString())));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Неправильный запрос");
         }

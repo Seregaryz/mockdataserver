@@ -31,6 +31,7 @@ public class MockApiController {
             List<ClassModel> classModels = endpoint.getClassModels();
             List<PrimitiveField> primitiveFields = classModels.get(0).getPrimitiveFields();
             List<InternalField> internalFields = classModels.get(0).getInternalFields();
+
             if (pathVariable.equals("dina")) {
                 return ResponseEntity.ok("Kiss kiss");
             } else if (pathVariable.equals("home")) {
