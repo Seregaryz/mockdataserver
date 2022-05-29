@@ -49,7 +49,6 @@ public class PluginDataController {
     @PostMapping("/add_new_endpoint")
     public ResponseEntity<String> sendPluginData(@RequestBody PluginResponse pluginResponse) {
         try {
-
             HashMap<String, LinkedTreeMap<String, Object>> jsonModelMap;
             HashMap<String, FieldType> modelMap;
             try {
@@ -72,6 +71,7 @@ public class PluginDataController {
             Endpoint endpoint = new Endpoint();
             endpoint.setUserPath(pluginResponse.getEndpoint());
             endpoint.setAdditionalPath(pluginResponse.getUserId());
+            endpoint.setLocale(pluginResponse.getLocale());
             Endpoint savedEndpointValue = endpointRepository.save(endpoint);
 
             // save class models
@@ -88,12 +88,13 @@ public class PluginDataController {
                 if (modelMap.get(fieldKey).getPrimitive()) {
                     GeneratedItem generatedItem = dataGenerationService.generateValue(
                         modelMap.get(fieldKey).getType(),
-                        fieldKey
+                        fieldKey,
+                        pluginResponse.getLocale()
                     );
                     PrimitiveField primitiveField = new PrimitiveField();
                     primitiveField.setName(fieldKey);
                     primitiveField.setClassModel(savedRootClassModel);
-                    primitiveField.setTypeId(dataGenerationService.getTypeId());
+                    primitiveField.setTypeId(generatedItem.getTypeId());
                     primitiveField.setIsStatic(pluginResponse.getIsStatic());
                     primitiveField.setStaticValue(generatedItem.getGeneratedValue());
                     primitiveFieldRepository.save(primitiveField);
@@ -126,12 +127,13 @@ public class PluginDataController {
                     if (finalAdditionalModelMap.get(fieldKey).getPrimitive()) {
                         GeneratedItem generatedItem = dataGenerationService.generateValue(
                             finalAdditionalModelMap.get(fieldKey).getType(),
-                            fieldKey
+                            fieldKey,
+                            pluginResponse.getLocale()
                         );
                         PrimitiveField primitiveField = new PrimitiveField();
                         primitiveField.setName(fieldKey);
                         primitiveField.setClassModel(savedAdditionalModel);
-                        primitiveField.setTypeId(dataGenerationService.getTypeId());
+                        primitiveField.setTypeId(generatedItem.getTypeId());
                         primitiveField.setIsStatic(pluginResponse.getIsStatic());
                         primitiveField.setStaticValue(generatedItem.getGeneratedValue());
                         primitiveFieldRepository.save(primitiveField);

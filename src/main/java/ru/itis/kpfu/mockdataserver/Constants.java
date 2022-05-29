@@ -22,4 +22,15 @@ public class Constants {
             "name", "title", "label", "mention", "header"
     };
 
+    public static final String[] MESSAGE_OCCURRENCES = new String[] {
+        "message", "comment", "subtitle", "desc", "description", "letter", "instruction"
+    };
+
+    public static final int TYPE_UNKNOWN = 0;
+    public static final int TYPE_PRIMITIVE_SINGLE = 1;
+    public static final int TYPE_STRING_SINGLE = 2;
+    public static final int TYPE_PRIMITIVE_LIST = 3;
+    public static final int TYPE_STRING_LIST = 4;
+    public static final int TYPE_MAP_SINGLE = 5;
+
 }
