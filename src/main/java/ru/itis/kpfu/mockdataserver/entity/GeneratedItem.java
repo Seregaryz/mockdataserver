@@ -4,10 +4,12 @@ public class GeneratedItem {
 
     private int typeId;
     private String generatedValue;
+    private boolean isList;
 
-    public GeneratedItem(int typeId, String generatedValue) {
+    public GeneratedItem(int typeId, String generatedValue, boolean isList) {
         this.typeId = typeId;
         this.generatedValue = generatedValue;
+        this.isList = isList;
     }
 
     public int getTypeId() {
@@ -24,5 +26,13 @@ public class GeneratedItem {
 
     public void setGeneratedValue(String generatedValue) {
         this.generatedValue = generatedValue;
+    }
+
+    public boolean isList() {
+        return isList;
+    }
+
+    public void setIsList(boolean list) {
+        isList = list;
     }
 }

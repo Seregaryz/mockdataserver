@@ -19,7 +19,7 @@ public class DataGenerationService {
         if (isSinglePrimitive(pluginType)) {
             String pluginTypeClean;
             if (pluginType.endsWith("?")) {
-                pluginTypeClean = pluginType.substring(0, pluginType.length() - 2);
+                pluginTypeClean = pluginType.substring(0, pluginType.length() - 1);
             } else pluginTypeClean = pluginType;
             return generateSinglePrimitive(pluginTypeClean);
         } else if (isSingleString(pluginType)) {
@@ -27,15 +27,15 @@ public class DataGenerationService {
         } else if (isPrimitivesList(pluginType)) {
             return generatePrimitivesList(pluginType);
         } else if (isStringList(pluginType)) {
-            return generateStringList(pluginType, locale);
+            return generateStringList(fieldName, locale);
         } else return generateMapValue(pluginType, locale);
     }
 
     private GeneratedItem generateMapValue(String pluginType, String locale) {
         if (!isMapList(pluginType)) {
-            return new GeneratedItem(0, "Example");
+            return new GeneratedItem(0, "Example", false);
         } else {
-            return new GeneratedItem(0, "Example");
+            return new GeneratedItem(0, "Example", true);
         }
     }
 
@@ -57,36 +57,41 @@ public class DataGenerationService {
 
     private GeneratedItem generatePrimitivesList(String pluginType) {
         ArrayList<GeneratedItem> list = new ArrayList<>();
-        for (int i = 0; i < 2; i++) {
-            list.add(generateSinglePrimitive(pluginType));
+        String pluginTypeClean;
+        pluginTypeClean = pluginType.substring(1, pluginType.length() -1);
+        if (pluginTypeClean.endsWith("?")) {
+            pluginTypeClean = pluginTypeClean.substring(0, pluginType.length() - 1);
+        }
+        for (int i = 0; i < 3; i++) {
+            list.add(generateSinglePrimitive(pluginTypeClean));
         }
         StringBuilder result = new StringBuilder();
         list.forEach(item -> {
             result.append(item.getGeneratedValue());
             result.append(";");
         });
-        return new GeneratedItem(list.get(0).getTypeId(), result.toString());
+        return new GeneratedItem(list.get(0).getTypeId(), result.toString(), true);
     }
 
-    private GeneratedItem generateStringList(String pluginType, String locale) {
-        ArrayList<GeneratedItem> list = new ArrayList<>();
-        for (int i = 0; i < 2; i++) {
-            list.add(new GeneratedItem(11, generateHeaderString(locale)));
+    private GeneratedItem generateStringList(String fieldName, String locale) {
+        ArrayList<String> list = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            list.add(generateStringValue(fieldName, locale).getGeneratedValue());
         }
         StringBuilder result = new StringBuilder();
         list.forEach(item -> {
-            result.append(item.getGeneratedValue());
+            result.append(item);
             result.append(";");
         });
-        return new GeneratedItem(11, result.toString());
+        return new GeneratedItem(11, result.toString(), true);
     }
 
     private GeneratedItem generateStringValue(String fieldName, String locale) {
         if (isHeaderField(fieldName)) {
-            return new GeneratedItem(11, generateHeaderString(locale));
+            return new GeneratedItem(11, generateHeaderString(locale), false);
         } else if (isMessageField(fieldName)) {
-            return new GeneratedItem(11, generateMessageString(locale));
-        } else return new GeneratedItem(11, generateDefaultString(locale));
+            return new GeneratedItem(11, generateMessageString(locale), false);
+        } else return new GeneratedItem(11, generateDefaultString(locale), false);
     }
 
     private String generateDefaultString(String locale) {
@@ -167,25 +172,25 @@ public class DataGenerationService {
         Random random = new Random();
         switch (pluginType) {
             case Constants.TYPE_BOOLEAN:
-                return new GeneratedItem(1, random.nextBoolean() + "");
+                return new GeneratedItem(1, random.nextBoolean() + "", false);
             case Constants.TYPE_INT:
-                return new GeneratedItem(2, random.nextInt() + "");
+                return new GeneratedItem(2, random.nextInt() + "", false);
             case Constants.TYPE_LONG:
-                return new GeneratedItem(3, random.nextLong() + "");
+                return new GeneratedItem(3, random.nextLong() + "", false);
             case Constants.TYPE_DOUBLE:
-                return new GeneratedItem(4, generateRandomDouble(random) + "");
+                return new GeneratedItem(4, generateRandomDouble(random) + "", false);
             case Constants.TYPE_FLOAT:
-                return new GeneratedItem(5, generateRandomFloat(random) + "");
+                return new GeneratedItem(5, generateRandomFloat(random) + "", false);
             case Constants.TYPE_SHORT:
-                return new GeneratedItem(6, random.nextInt(Short.MAX_VALUE + 1) + "");
+                return new GeneratedItem(6, random.nextInt(Short.MAX_VALUE + 1) + "", false);
             case Constants.TYPE_BYTE:
-                return new GeneratedItem(7, random.nextInt(Byte.MAX_VALUE + 1) + "");
+                return new GeneratedItem(7, random.nextInt(Byte.MAX_VALUE + 1) + "", false);
             case Constants.TYPE_CHAR:
-                return new GeneratedItem(8, getRandomEnglishChar() + "");
+                return new GeneratedItem(8, getRandomEnglishChar() + "", false);
             case Constants.TYPE_NUMBER:
-                return new GeneratedItem(9, random.nextInt() + "");
+                return new GeneratedItem(9, random.nextInt() + "", false);
             default:
-                return new GeneratedItem(10, "null");
+                return new GeneratedItem(10, "null", false);
         }
     }
 

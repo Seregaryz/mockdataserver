@@ -18,6 +18,10 @@ public class PrimitiveField {
 
     private String staticValue;
 
+    private Boolean isList;
+
+    private String typeName;
+
     @ManyToOne
     @JoinColumn(name = "parent_id")
     private ClassModel classModel;
@@ -72,4 +76,21 @@ public class PrimitiveField {
     public void setClassModel(ClassModel classModel) {
         this.classModel = classModel;
     }
+
+    public Boolean getIsList() {
+        return isList;
+    }
+
+    public void setIsList(Boolean isList) {
+        this.isList = isList;
+    }
+
+    public String getTypeName() {
+        return typeName;
+    }
+
+    public void setTypeName(String typeName) {
+        this.typeName = typeName;
+    }
+
 }

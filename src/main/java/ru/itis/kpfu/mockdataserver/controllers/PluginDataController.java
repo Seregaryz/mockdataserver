@@ -20,7 +20,6 @@ import ru.itis.kpfu.mockdataserver.repository.PrimitiveFieldRepository;
 import ru.itis.kpfu.mockdataserver.service.DataGenerationService;
 import ru.itis.kpfu.mockdataserver.service.PluginDataService;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -93,16 +92,18 @@ public class PluginDataController {
                     );
                     PrimitiveField primitiveField = new PrimitiveField();
                     primitiveField.setName(fieldKey);
+                    primitiveField.setIsList(generatedItem.isList());
                     primitiveField.setClassModel(savedRootClassModel);
                     primitiveField.setTypeId(generatedItem.getTypeId());
                     primitiveField.setIsStatic(pluginResponse.getIsStatic());
                     primitiveField.setStaticValue(generatedItem.getGeneratedValue());
+                    primitiveField.setTypeName(modelMap.get(fieldKey).getType());
                     primitiveFieldRepository.save(primitiveField);
                 } else {
                     InternalField internalField = new InternalField();
                     internalField.setName(fieldKey);
                     internalField.setClassModel(savedRootClassModel);
-                    internalField.setType_name(modelMap.get(fieldKey).getType());
+                    internalField.setTypeName(modelMap.get(fieldKey).getType());
                     internalFieldRepository.save(internalField);
                 }
             });
@@ -132,16 +133,18 @@ public class PluginDataController {
                         );
                         PrimitiveField primitiveField = new PrimitiveField();
                         primitiveField.setName(fieldKey);
+                        primitiveField.setIsList(generatedItem.isList());
                         primitiveField.setClassModel(savedAdditionalModel);
                         primitiveField.setTypeId(generatedItem.getTypeId());
                         primitiveField.setIsStatic(pluginResponse.getIsStatic());
                         primitiveField.setStaticValue(generatedItem.getGeneratedValue());
+                        primitiveField.setTypeName(finalAdditionalModelMap.get(fieldKey).getType());
                         primitiveFieldRepository.save(primitiveField);
                     } else {
                         InternalField internalField = new InternalField();
                         internalField.setName(fieldKey);
                         internalField.setClassModel(savedAdditionalModel);
-                        internalField.setType_name(finalAdditionalModelMap.get(fieldKey).getType());
+                        internalField.setTypeName(finalAdditionalModelMap.get(fieldKey).getType());
                         internalFieldRepository.save(internalField);
                     }
                 });

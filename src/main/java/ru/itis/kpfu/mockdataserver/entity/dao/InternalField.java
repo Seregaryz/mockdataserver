@@ -12,7 +12,7 @@ public class InternalField {
 
     private String name;
 
-    private String type_name;
+    private String typeName;
 
     @ManyToOne
     @JoinColumn(name = "parent_id")
@@ -37,12 +37,12 @@ public class InternalField {
         this.name = name;
     }
 
-    public String getType_name() {
-        return type_name;
+    public String getTypeName() {
+        return typeName;
     }
 
-    public void setType_name(String type_name) {
-        this.type_name = type_name;
+    public void setTypeName(String typeName) {
+        this.typeName = typeName;
     }
 
     public ClassModel getClassModel() {
