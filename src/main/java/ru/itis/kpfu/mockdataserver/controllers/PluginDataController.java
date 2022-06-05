@@ -71,6 +71,7 @@ public class PluginDataController {
             endpoint.setUserPath(pluginResponse.getEndpoint());
             endpoint.setAdditionalPath(pluginResponse.getUserId());
             endpoint.setLocale(pluginResponse.getLocale());
+            endpoint.setIsRepresentative(pluginResponse.getIsRepresentative());
             Endpoint savedEndpointValue = endpointRepository.save(endpoint);
 
             // save class models
@@ -88,7 +89,8 @@ public class PluginDataController {
                     GeneratedItem generatedItem = dataGenerationService.generateValue(
                         modelMap.get(fieldKey).getType(),
                         fieldKey,
-                        pluginResponse.getLocale()
+                        pluginResponse.getLocale(),
+                        pluginResponse.getIsRepresentative()
                     );
                     PrimitiveField primitiveField = new PrimitiveField();
                     primitiveField.setName(fieldKey);
@@ -129,7 +131,8 @@ public class PluginDataController {
                         GeneratedItem generatedItem = dataGenerationService.generateValue(
                             finalAdditionalModelMap.get(fieldKey).getType(),
                             fieldKey,
-                            pluginResponse.getLocale()
+                            pluginResponse.getLocale(),
+                            pluginResponse.getIsRepresentative()
                         );
                         PrimitiveField primitiveField = new PrimitiveField();
                         primitiveField.setName(fieldKey);

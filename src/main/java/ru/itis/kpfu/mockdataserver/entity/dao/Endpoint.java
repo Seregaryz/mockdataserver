@@ -19,6 +19,8 @@ public class Endpoint {
 
     private String locale;
 
+    private boolean isRepresentative;
+
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "endpoint")
     private List<ClassModel> classModels;
 
@@ -71,5 +73,13 @@ public class Endpoint {
 
     public void setClassModels(List<ClassModel> classModels) {
         this.classModels = classModels;
+    }
+
+    public boolean getIsRepresentative() {
+        return isRepresentative;
+    }
+
+    public void setIsRepresentative(boolean isRepresentative) {
+        this.isRepresentative = isRepresentative;
     }
 }

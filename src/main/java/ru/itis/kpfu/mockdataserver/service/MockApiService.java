@@ -45,8 +45,13 @@ public class MockApiService {
             classModels.stream().filter(ClassModel::getRoot).collect(Collectors.toList());
         if (rootFilteredList.size() == 1) {
             ClassModel rootModel = rootFilteredList.get(0);
-            HashMap<String, Object> response =
-                proceedInternalModels(rootModel, new HashMap<>(), classModels, endpoint.getLocale());
+            HashMap<String, Object> response = proceedInternalModels(
+                rootModel,
+                new HashMap<>(),
+                classModels,
+                endpoint.getLocale(),
+                endpoint.getIsRepresentative()
+            );
             GsonBuilder builder = new GsonBuilder().serializeNulls();
             Gson gson = builder.create();
             return gson.toJson(response);
@@ -59,12 +64,13 @@ public class MockApiService {
         ClassModel model,
         HashMap<String, Object> currentMap,
         List<ClassModel> classModels,
-        String locale
+        String locale,
+        boolean isRepresentative
     ) {
         if (model.getHasPrimitive()) {
             List<PrimitiveField> primitiveFields = model.getPrimitiveFields();
             primitiveFields.forEach(field -> {
-                proceedPrimitiveValueToResponse(field, currentMap, locale);
+                proceedPrimitiveValueToResponse(field, currentMap, locale, isRepresentative);
             });
         }
         if (model.getHasInternal()) {
@@ -78,7 +84,7 @@ public class MockApiService {
                     ClassModel internalModel = additionalFilteredList.get(0);
                     currentMap.put(
                         internalField.getName(),
-                        proceedInternalModels(internalModel, new HashMap<>(), classModels, locale)
+                        proceedInternalModels(internalModel, new HashMap<>(), classModels, locale, isRepresentative)
                     );
                 }
             });
@@ -89,10 +95,12 @@ public class MockApiService {
     private void proceedPrimitiveValueToResponse(
         PrimitiveField field,
         HashMap<String, Object> responseMap,
-        String locale
+        String locale,
+        boolean isRepresentative
     ) {
         if (!field.getIsStatic()) {
-            GeneratedItem newValue = dataGenerationService.generateValue(field.getTypeName(), field.getName(), locale);
+            GeneratedItem newValue =
+                dataGenerationService.generateValue(field.getTypeName(), field.getName(), locale, isRepresentative);
             field.setStaticValue(newValue.getGeneratedValue());
         }
         addPrimitiveToResponseMap(field, responseMap);
