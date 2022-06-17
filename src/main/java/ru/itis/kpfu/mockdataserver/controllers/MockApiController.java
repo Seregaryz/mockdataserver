@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.itis.kpfu.mockdataserver.service.RequestHistoryService;
 import ru.itis.kpfu.mockdataserver.service.MockApiService;
 
 @RestController
@@ -15,6 +16,9 @@ public class MockApiController {
     @Autowired
     private MockApiService mockApiService;
 
+    @Autowired
+    private RequestHistoryService requestHistoryService;
+
     @GetMapping("/{pathVariable}/{userPathVariable}")
     public ResponseEntity<String> getGeneratedValue(
             @PathVariable("pathVariable") String pathVariable,
@@ -22,7 +26,8 @@ public class MockApiController {
     ) {
         try {
             String response = mockApiService.getResponse(pathVariable, userPathVariable);
-            if (response.startsWith("{")) {
+            if (response.startsWith("{") || response.startsWith("[")) {
+                requestHistoryService.saveEndpointToHistory(response, pathVariable, userPathVariable);
                 return ResponseEntity.ok().body(response);
             } else return ResponseEntity.badRequest().body("Неправильные данные");
         } catch (Exception e) {

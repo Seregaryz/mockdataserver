@@ -15,6 +15,7 @@ import ru.itis.kpfu.mockdataserver.repository.EndpointRepository;
 import ru.itis.kpfu.mockdataserver.repository.InternalFieldRepository;
 import ru.itis.kpfu.mockdataserver.repository.PrimitiveFieldRepository;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -45,16 +46,32 @@ public class MockApiService {
             classModels.stream().filter(ClassModel::getRoot).collect(Collectors.toList());
         if (rootFilteredList.size() == 1) {
             ClassModel rootModel = rootFilteredList.get(0);
-            HashMap<String, Object> response = proceedInternalModels(
-                rootModel,
-                new HashMap<>(),
-                classModels,
-                endpoint.getLocale(),
-                endpoint.getIsRepresentative()
-            );
-            GsonBuilder builder = new GsonBuilder().serializeNulls();
-            Gson gson = builder.create();
-            return gson.toJson(response);
+            if (!endpoint.isList()) {
+                HashMap<String, Object> response = proceedInternalModels(
+                        rootModel,
+                        new HashMap<>(),
+                        classModels,
+                        endpoint.getLocale(),
+                        endpoint.getIsRepresentative()
+                );
+                GsonBuilder builder = new GsonBuilder().setPrettyPrinting().serializeNulls();
+                Gson gson = builder.create();
+                return gson.toJson(response);
+            } else {
+                ArrayList<HashMap<String, Object>> responseList = new ArrayList<>();
+                for (int i = 0; i < endpoint.getElementsCount(); i++) {
+                    responseList.add(proceedInternalModels(
+                            rootModel,
+                            new HashMap<>(),
+                            classModels,
+                            endpoint.getLocale(),
+                            endpoint.getIsRepresentative()
+                    ));
+                }
+                GsonBuilder builder = new GsonBuilder().setPrettyPrinting().serializeNulls();
+                Gson gson = builder.create();
+                return gson.toJson(responseList);
+            }
         } else {
             return "Внутренняя ошибка сервера";
         }

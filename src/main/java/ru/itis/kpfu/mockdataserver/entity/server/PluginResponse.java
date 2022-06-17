@@ -11,6 +11,26 @@ public class PluginResponse {
     private String locale;
     private Boolean isRepresentative;
 
+    private Boolean isList;
+
+    private int elementsCount;
+
+    public Boolean getIsList() {
+        return isList;
+    }
+
+    public void setList(Boolean isList) {
+        this.isList = isList;
+    }
+
+    public int getElementsCount() {
+        return elementsCount;
+    }
+
+    public void setElementsCount(int elementsCount) {
+        this.elementsCount = elementsCount;
+    }
+
     public String getEndpoint() {
         return endpoint;
     }

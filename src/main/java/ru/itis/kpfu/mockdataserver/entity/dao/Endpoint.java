@@ -21,6 +21,10 @@ public class Endpoint {
 
     private boolean isRepresentative;
 
+    private boolean isList;
+
+    private int elementsCount;
+
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "endpoint")
     private List<ClassModel> classModels;
 
@@ -81,5 +85,21 @@ public class Endpoint {
 
     public void setIsRepresentative(boolean isRepresentative) {
         this.isRepresentative = isRepresentative;
+    }
+
+    public boolean isList() {
+        return isList;
+    }
+
+    public void setList(boolean list) {
+        isList = list;
+    }
+
+    public int getElementsCount() {
+        return elementsCount;
+    }
+
+    public void setElementsCount(int elementsCount) {
+        this.elementsCount = elementsCount;
     }
 }
